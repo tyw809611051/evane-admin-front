@@ -20,6 +20,38 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
     var miniAdmin = {
 
         /**
+         * 带验证的请求
+         * @param type      "GET|POST"
+         * @param url       "访问地址"
+         * @param token     "验证key"
+         * @param success   "成功回调"
+         * @param error     "错误回调"
+         */
+         requestDataWithToken:function(type,url,token,success,error){
+            $.ajax({
+                type:type,
+                url:url,
+                // beforeSend: function(request) {
+                //     request.setRequestHeader("Access-Token", token);
+                //     request.setRequestHeader("Access-Control-Allow-Origin", '*');
+                // },
+                headers: {
+                    // "Access-Token":token,//自定义请求头
+                    // "Content-Type":"application/json;charset=utf8"
+                    // "Access-Control-Allow-Origin":"http://evanefront.com:7082",
+                    // 'Access-Control-Allow-Headers': 'Origin, Content-Type, Cookie,X-Requested-With, X-CSRF-TOKEN, Accept, Authorization, X-XSRF-TOKEN',
+                    // 'Access-Control-Expose-Headers': 'Authorization, authenticated',
+                    // 'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, OPTIONS',
+                    // 'Access-Control-Allow-Credentials': 'true',
+                },
+                // crossDomain: true,
+                dataType:"json",
+                success:success,
+                error:error,
+            })
+        },
+
+        /**
          * 后台框架初始化
          * @param options.iniUrl   后台初始化接口地址
          * @param options.clearUrl   后台清理缓存接口
@@ -41,12 +73,13 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
             options.loadingTime = options.loadingTime || 1;
             options.pageAnim = options.pageAnim || false;
             options.maxTabNum = options.maxTabNum || 20;
-            $.getJSON(options.iniUrl, function (data) {
+            
+            miniAdmin.requestDataWithToken("GET",options.iniUrl,options.accessToken,function(data){
                 if (data == null) {
                     miniAdmin.error('暂无菜单信息')
                 } else {
                     miniAdmin.renderLogo(data.logoInfo);
-                    miniAdmin.renderClear(options.clearUrl);
+                    miniAdmin.renderClear(options.clearUrl,options.accessToken);
                     miniAdmin.renderHome(data.homeInfo);
                     miniAdmin.renderAnim(options.pageAnim);
                     miniAdmin.listen();
@@ -73,9 +106,9 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
                     });
                     miniAdmin.deleteLoader(options.loadingTime);
                 }
-            }).fail(function () {
+            },function (data) {
                 miniAdmin.error('菜单接口有误');
-            });
+            })
         },
 
         /**
@@ -102,8 +135,9 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
          * 初始化缓存地址
          * @param clearUrl
          */
-        renderClear: function (clearUrl) {
+        renderClear: function (clearUrl,accessToken) {
             $('.layuimini-clear').attr('data-href',clearUrl);
+            $('.layuimini-clear').attr('data-token',accessToken);
         },
 
         /**
@@ -254,14 +288,14 @@ layui.define(["jquery", "miniMenu", "element","miniTab", "miniTheme"], function 
                 // 判断是否清理服务端
                 var clearUrl = $(this).attr('data-href');
                 if (clearUrl != undefined && clearUrl != '' && clearUrl != null) {
-                    $.getJSON(clearUrl, function (data, status) {
+                    miniAdmin.requestDataWithToken("GET",clearUrl,token,function(data){
                         layer.close(loading);
                         if (data.code != 1) {
                             return miniAdmin.error(data.msg);
                         } else {
                             return miniAdmin.success(data.msg);
                         }
-                    }).fail(function () {
+                    },function (data) {
                         layer.close(loading);
                         return miniAdmin.error('清理缓存接口有误');
                     });

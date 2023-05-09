@@ -128,14 +128,16 @@
 <script src="lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="js/lay-config.js?v=2.0.0" charset="utf-8"></script>
 <script>
-    layui.use(['jquery', 'layer', 'miniAdmin','miniTongji'], function () {
+    layui.use(['jquery', 'layer', 'miniAdmin','miniTongji','http'], function () {
         var $ = layui.jquery,
             layer = layui.layer,
             miniAdmin = layui.miniAdmin,
             miniTongji = layui.miniTongji;
-        var apiUrl = "http://127.0.0.1:7680/"
+            http = layui.http;
+        
+        var token = layui.sessionData('token_data').token
         var options = {
-            iniUrl: apiUrl+"api/menu/getAll",    // 初始化接口
+            iniUrl: http.api+"api/menu/getAll",    // 初始化接口
             clearUrl: "api/clear.json", // 缓存清理接口
             urlHashLocation: false,      // 是否打开hash定位
             bgColorDefault: false,      // 主题默认配置
@@ -144,6 +146,7 @@
             loadingTime: 0,             // 初始化加载时间
             pageAnim: true,             // iframe窗口动画
             maxTabNum: 20,              // 最大的tab打开数量
+            accessToken:token,
         };
         miniAdmin.render(options);
 
