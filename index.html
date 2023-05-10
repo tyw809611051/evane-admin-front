@@ -162,6 +162,10 @@
 
         $('.login-out').on("click", function () {
             layer.msg('退出登录成功', function () {
+                layui.sessionData("token_data",{
+                        key:"token",
+                        value : ""
+                    })
                 window.location = 'page/login.html';
             });
         });

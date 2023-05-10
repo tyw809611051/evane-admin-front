@@ -63,14 +63,15 @@
             form = layui.form,
             table = layui.table;
             http = layui.http;
+
         var token = layui.sessionData('token_data').token
+        if (token == "") {
+            window.location = '../../page/login.html';
+            return false;
+        }
         table.render({
             elem: '#currentTableId',
             url: http.api+'api/article/index',
-            // headers: {
-            //     "Access-Token":token,
-            //  },
-            xhrFields:{withCredentials: true},
             toolbar: '#toolbarDemo',
             defaultToolbar: ['filter', 'exports', 'print', {
                 title: '提示',
